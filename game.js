@@ -11,29 +11,27 @@ var cursors;
 var speed = 175;
 var score = 0;
 var scoreText;
+var winText;
+var lives = 4;
+var livesText;
 
 function preload() {
 	//set background color of canvas
 	game.stage.backgroundColor = '#eee';
-
 	//load assets
 	game.load.image('player', 'asset/blue-square.png');
 	game.load.image('food', 'asset/red-square.png');
+    game.load.image('enemy', 'asset/enemy.png');
 }
 function create() {
 	//start arcade physics engine
 	game.physics.startSystem(Phaser.Physics.ARCADE);
-
 	//initialize keyboard arrows for the game controls
 	cursors = game.input.keyboard.createCursorKeys();
 
-	//add player sprite
 	player = game.add.sprite(width*0.5, height*0.5, 'player');
-	//set anchor point to center of the sprite
 	player.anchor.set(0.5);
-	//enable physics for the player body
 	game.physics.enable(player, Phaser.Physics.ARCADE);
-	//make the player collide with the bounds of the world
 	player.body.collideWorldBounds = true;
 
 	//create a group called food and add 4 food pieces to the game
@@ -42,6 +40,7 @@ function create() {
 	food.create(width*0.9, height*0.1, 'food');
 	food.create(width*0.1, height*0.9, 'food');
 	food.create(width*0.9, height*0.9, 'food');
+
 	//set the anchors of their sprites to the center
 	for (var i in food.children) {
 		food.children[i].anchor.set(0.5);
@@ -51,6 +50,21 @@ function create() {
 
 	//place score text on the screen
 	scoreText = game.add.text(5, 3, score);
+    
+    livesText = game.add.text(70, 3, lives);
+    
+    
+    enemy = game.add.group();
+	enemy.create(130, 10, 'enemy');
+	enemy.create(300, 100, 'enemy');
+    enemy.create(30, 80, 'enemy');
+	enemy.create(60, 200, 'enemy');
+    for (var i in enemy.children) {
+		enemy.children[i].anchor.set(0.5);
+	}
+    //enable physics for enemies
+	game.physics.enable(enemy, Phaser.Physics.ARCADE);
+    
 }
 function update() {
 
@@ -75,12 +89,14 @@ function update() {
 	else {
 		player.body.velocity.x = 0;
 	}
-
 	//call eatFood function when the player and a piece of food overlap
 	game.physics.arcade.overlap(player, food, eatFood);
+    
+    game.physics.arcade.overlap(player, enemy, eatEnemy);
+    
 }
 
-//eatFood function
+
 function eatFood(player, food) {
 	//remove the piece of food
 	food.kill();
@@ -88,3 +104,11 @@ function eatFood(player, food) {
 	score++;
 	scoreText.text = score;
 }
+
+function eatEnemy(player, enemy){
+    enemy.kill();
+    lives--;
+    livesText.text = lives;
+}
+
+
